@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hive Frontline — Area Pincode Request Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ---- Reset & Variables ---- */
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f7f8fa; --bg2:#fff; --bg3:#eef1f5;
+  --navy:#0A1B3F; --blue:#0088ff; --blue-soft:#e8f4ff;
+  --green:#059669; --green-soft:#d1fae5;
+  --amber:#d97706; --amber-soft:#fef3c7;
+  --red:#dc2626; --red-soft:#fee2e2;
+  --txt:#1a1a2e; --txt2:#6b7280; --txt3:#9ca3af;
+  --border:#e5e7eb; --border2:#d1d5db;
+  --radius:12px; --radius-sm:8px;
+  --shadow:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg:0 10px 40px rgba(0,0,0,0.1);
+  --font:'DM Sans',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+html{font-family:var(--font);color:var(--txt);background:var(--bg);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{min-height:100vh}
+a{color:var(--blue);text-decoration:none}
+
+/* ---- Layout ---- */
+.topbar{background:var(--navy);color:#fff;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar h1{font-size:16px;font-weight:600;letter-spacing:-0.01em;display:flex;align-items:center;gap:10px}
+.topbar h1 span{font-weight:300;opacity:0.6;font-size:13px}
+.topbar-tabs{display:flex;gap:4px}
+.topbar-tab{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.7);
+  padding:7px 18px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;transition:all 0.15s;font-family:var(--font)}
+.topbar-tab:hover{background:rgba(255,255,255,0.14);color:#fff}
+.topbar-tab.active{background:var(--blue);border-color:var(--blue);color:#fff}
+
+.container{max-width:720px;margin:0 auto;padding:32px 20px 60px}
+.container.wide{max-width:1080px}
+
+/* ---- Cards ---- */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:28px;box-shadow:var(--shadow)}
+.card+.card{margin-top:20px}
+.card-header{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.card-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.card-icon.blue{background:var(--blue-soft);color:var(--blue)}
+.card-icon.green{background:var(--green-soft);color:var(--green)}
+.card-icon.amber{background:var(--amber-soft);color:var(--amber)}
+.card-title{font-size:17px;font-weight:600;color:var(--txt)}
+.card-subtitle{font-size:13px;color:var(--txt2);margin-top:2px}
+
+/* ---- Form ---- */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:600px){.form-grid{grid-template-columns:1fr}}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:12.5px;font-weight:600;color:var(--txt2);text-transform:uppercase;letter-spacing:0.06em}
+.form-input{padding:10px 14px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-size:14.5px;font-family:var(--font);
+  color:var(--txt);transition:all 0.15s;background:var(--bg);outline:none}
+.form-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,136,255,0.1)}
+.form-input::placeholder{color:var(--txt3)}
+.form-input.mono{font-family:var(--mono);font-size:16px;font-weight:600;letter-spacing:0.12em}
+textarea.form-input{resize:vertical;min-height:80px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 24px;border-radius:var(--radius-sm);
+  font-size:14px;font-weight:600;font-family:var(--font);cursor:pointer;transition:all 0.15s;border:none}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:#0070dd;box-shadow:var(--shadow-md)}
+.btn-primary:disabled{background:var(--txt3);cursor:not-allowed}
+.btn-outline{background:transparent;color:var(--txt2);border:1px solid var(--border2)}
+.btn-outline:hover{background:var(--bg3);color:var(--txt)}
+.btn-sm{padding:6px 14px;font-size:12.5px;border-radius:6px}
+.btn-approve{background:var(--green);color:#fff}.btn-approve:hover{background:#047857}
+.btn-reject{background:var(--red);color:#fff}.btn-reject:hover{background:#b91c1c}
+
+.form-footer{display:flex;justify-content:flex-end;gap:10px;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+
+/* ---- Alerts ---- */
+.alert{padding:14px 18px;border-radius:var(--radius-sm);font-size:13.5px;font-weight:500;display:none;align-items:center;gap:10px;margin-bottom:16px}
+.alert.show{display:flex}
+.alert-success{background:var(--green-soft);color:var(--green);border:1px solid rgba(5,150,105,0.2)}
+.alert-error{background:var(--red-soft);color:var(--red);border:1px solid rgba(220,38,38,0.2)}
+.alert-warning{background:var(--amber-soft);color:var(--amber);border:1px solid rgba(217,119,6,0.2)}
+
+/* ---- Stats ---- */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+@media(max-width:600px){.stats{grid-template-columns:1fr 1fr}}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;text-align:center}
+.stat-num{font-family:var(--mono);font-size:28px;font-weight:700;line-height:1}
+.stat-label{font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:0.08em;margin-top:6px}
+.stat.pending .stat-num{color:var(--amber)}
+.stat.approved .stat-num{color:var(--green)}
+.stat.rejected .stat-num{color:var(--red)}
+.stat.total .stat-num{color:var(--navy)}
+
+/* ---- Table ---- */
+.table-wrap{overflow-x:auto;margin-top:16px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;padding:10px 14px;font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;
+  letter-spacing:0.08em;border-bottom:2px solid var(--border);background:var(--bg)}
+td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:hover td{background:var(--blue-soft)}
+.pin-code{font-family:var(--mono);font-weight:700;font-size:14px;color:var(--navy)}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em}
+.badge-pending{background:var(--amber-soft);color:var(--amber)}
+.badge-approved{background:var(--green-soft);color:var(--green)}
+.badge-rejected{background:var(--red-soft);color:var(--red)}
+.mr-name{font-weight:600;color:var(--txt)}
+.mr-id{font-size:11.5px;color:var(--txt3);font-family:var(--mono)}
+.date-cell{font-size:12.5px;color:var(--txt2)}
+.actions{display:flex;gap:6px}
+
+/* ---- Page Views ---- */
+.page{display:none}
+.page.active{display:block}
+
+/* ---- Loading ---- */
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ---- Empty state ---- */
+.empty{text-align:center;padding:48px 20px;color:var(--txt3)}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:0.5}
+.empty-text{font-size:14px}
+
+/* ---- Intro ---- */
+.intro{background:linear-gradient(135deg,var(--navy) 0%,#152952 100%);color:#fff;border-radius:var(--radius);
+  padding:28px;margin-bottom:24px;position:relative;overflow:hidden}
+.intro::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;border-radius:50%;
+  background:rgba(0,136,255,0.08);pointer-events:none}
+.intro h2{font-size:20px;font-weight:700;margin-bottom:8px}
+.intro p{font-size:13.5px;opacity:0.75;line-height:1.55;max-width:560px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <h1>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    Pincode Portal <span>· Hive Frontline</span>
+  </h1>
+  <div class="topbar-tabs">
+    <button class="topbar-tab active" onclick="showPage('request')">Request</button>
+    <button class="topbar-tab" onclick="showPage('admin')">Admin</button>
+  </div>
+</div>
+
+<!-- ============== MR REQUEST PAGE ============== -->
+<div class="page active" id="page-request">
+  <div class="container">
+    <div class="intro">
+      <h2>Request a New Area Pincode</h2>
+      <p>If a pincode / area is not available in your Hive Frontline account, submit a request here. Your request will be reviewed and the area will be added to the system.</p>
+    </div>
+
+    <div id="alert-request" class="alert"></div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon blue">📍</div>
+        <div>
+          <div class="card-title">New Pincode Request</div>
+          <div class="card-subtitle">All fields are required</div>
+        </div>
+      </div>
+
+      <form id="pincode-form" onsubmit="submitRequest(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Your Name</label>
+            <input class="form-input" id="mrName" placeholder="e.g. Suresh Kumar" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Employee ID</label>
+            <input class="form-input mono" id="mrEmployeeId" placeholder="e.g. BB-1042" required>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Your Territory / Region</label>
+            <input class="form-input" id="mrTerritory" placeholder="e.g. Secunderabad, Telangana" required>
+          </div>
+        </div>
+
+        <div style="height:24px"></div>
+
+        <div class="card-header" style="margin-bottom:16px">
+          <div class="card-icon green">🗺️</div>
+          <div>
+            <div class="card-title">Area Details</div>
+            <div class="card-subtitle">Enter the pincode and area you want added</div>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Pincode</label>
+            <input class="form-input mono" id="pincode" placeholder="e.g. 500047" maxlength="6" pattern="\d{6}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Area / Locality Name</label>
+            <input class="form-input" id="areaName" placeholder="e.g. Malkajgiri" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">State</label>
+            <select class="form-input" id="state" required>
+              <option value="">Select State</option>
+              <option>Andhra Pradesh</option><option>Karnataka</option>
+              <option>Tamil Nadu</option><option>Telangana</option>
+              <option>Kerala</option><option>Maharashtra</option>
+              <option>Goa</option><option>Odisha</option>
+              <option>West Bengal</option><option>Other</option>
+            </select>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Reason for Request <span style="font-weight:400;opacity:0.6">(optional)</span></label>
+            <textarea class="form-input" id="reason" placeholder="e.g. New doctors onboarded in this area but pincode not available in the system"></textarea>
+          </div>
+        </div>
+
+        <div class="form-footer">
+          <button type="reset" class="btn btn-outline" onclick="clearAlert('alert-request')">Clear</button>
+          <button type="submit" class="btn btn-primary" id="submitBtn">
+            <span id="submitText">Submit Request</span>
+            <div class="spinner" id="submitSpinner"></div>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ============== ADMIN PAGE ============== -->
+<div class="page" id="page-admin">
+  <div class="container wide">
+    <div class="intro">
+      <h2>Pincode Requests — Admin Dashboard</h2>
+      <p>Review, approve, or reject pincode requests from the field team. All requests are stored in the database and MRs are notified of status changes.</p>
+    </div>
+
+    <div class="stats" id="stats">
+      <div class="stat total"><div class="stat-num" id="stat-total">—</div><div class="stat-label">Total</div></div>
+      <div class="stat pending"><div class="stat-num" id="stat-pending">—</div><div class="stat-label">Pending</div></div>
+      <div class="stat approved"><div class="stat-num" id="stat-approved">—</div><div class="stat-label">Approved</div></div>
+      <div class="stat rejected"><div class="stat-num" id="stat-rejected">—</div><div class="stat-label">Rejected</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon amber">📋</div>
+        <div>
+          <div class="card-title">All Requests</div>
+          <div class="card-subtitle" id="filter-label">Showing all requests</div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:6px">
+          <button class="btn btn-outline btn-sm" onclick="loadRequests()">All</button>
+          <button class="btn btn-outline btn-sm" onclick="loadRequests('pending')">Pending</button>
+          <button class="btn btn-outline btn-sm" onclick="loadRequests('approved')">Approved</button>
+          <button class="btn btn-outline btn-sm" onclick="loadRequests('rejected')">Rejected</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Pincode</th>
+              <th>Area</th>
+              <th>State</th>
+              <th>Requested By</th>
+              <th>Territory</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="requests-tbody">
+            <tr><td colspan="8" class="empty"><div class="empty-icon">📭</div><div class="empty-text">No requests yet</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// CONFIG — Change this to your deployed backend URL
+// ============================================================
+const API_BASE = "https://hive-pincode-api.onrender.com";
+// After deploying to Render, change to something like:
+// const API_BASE = "https://hive-pincode-api.onrender.com";
+
+// ---- Page switching ----
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.topbar-tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  if (page === 'admin') { loadStats(); loadRequests(); }
+}
+
+// ---- Alerts ----
+function showAlert(id, type, message) {
+  const el = document.getElementById(id);
+  el.className = 'alert alert-' + type + ' show';
+  el.innerHTML = message;
+}
+function clearAlert(id) {
+  const el = document.getElementById(id);
+  if (el) el.className = 'alert';
+}
+
+// ---- Submit request ----
+async function submitRequest(e) {
+  e.preventDefault();
+  clearAlert('alert-request');
+
+  const btn = document.getElementById('submitBtn');
+  const text = document.getElementById('submitText');
+  const spinner = document.getElementById('submitSpinner');
+
+  btn.disabled = true;
+  text.textContent = 'Submitting...';
+  spinner.style.display = 'block';
+
+  const payload = {
+    pincode: document.getElementById('pincode').value.trim(),
+    areaName: document.getElementById('areaName').value.trim(),
+    state: document.getElementById('state').value,
+    mrName: document.getElementById('mrName').value.trim(),
+    mrEmployeeId: document.getElementById('mrEmployeeId').value.trim(),
+    mrTerritory: document.getElementById('mrTerritory').value.trim(),
+    reason: document.getElementById('reason').value.trim(),
+  };
+
+  try {
+    const res = await fetch(API_BASE + '/api/pincode-requests', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      showAlert('alert-request', 'success', '✅ ' + data.message);
+      document.getElementById('pincode-form').reset();
+    } else {
+      showAlert('alert-request', res.status === 409 ? 'warning' : 'error', '⚠️ ' + data.message);
+    }
+  } catch (err) {
+    showAlert('alert-request', 'error', '❌ Could not connect to server. Please check your connection and try again.');
+  }
+
+  btn.disabled = false;
+  text.textContent = 'Submit Request';
+  spinner.style.display = 'none';
+}
+
+// ---- Load stats ----
+async function loadStats() {
+  try {
+    const res = await fetch(API_BASE + '/api/stats');
+    const data = await res.json();
+    if (data.success) {
+      document.getElementById('stat-total').textContent = data.stats.total;
+      document.getElementById('stat-pending').textContent = data.stats.pending;
+      document.getElementById('stat-approved').textContent = data.stats.approved;
+      document.getElementById('stat-rejected').textContent = data.stats.rejected;
+    }
+  } catch (err) {
+    console.error('Stats error:', err);
+  }
+}
+
+// ---- Load requests ----
+async function loadRequests(status) {
+  try {
+    const url = status
+      ? API_BASE + '/api/pincode-requests?status=' + status
+      : API_BASE + '/api/pincode-requests';
+
+    document.getElementById('filter-label').textContent =
+      status ? 'Showing ' + status + ' requests' : 'Showing all requests';
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const tbody = document.getElementById('requests-tbody');
+
+    if (!data.success || data.requests.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" class="empty"><div class="empty-icon">📭</div><div class="empty-text">No requests found</div></td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.requests.map(r => `
+      <tr>
+        <td><span class="pin-code">${r.pincode}</span></td>
+        <td>${r.areaName}</td>
+        <td>${r.state}</td>
+        <td><div class="mr-name">${r.mrName}</div><div class="mr-id">${r.mrEmployeeId}</div></td>
+        <td>${r.mrTerritory}</td>
+        <td><span class="badge badge-${r.status}">${r.status}</span></td>
+        <td class="date-cell">${new Date(r.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
+        <td class="actions">
+          ${r.status === 'pending' ? `
+            <button class="btn btn-approve btn-sm" onclick="updateStatus('${r._id}','approved')">✓</button>
+            <button class="btn btn-reject btn-sm" onclick="updateStatus('${r._id}','rejected')">✕</button>
+          ` : `
+            <button class="btn btn-outline btn-sm" onclick="updateStatus('${r._id}','pending')">↺</button>
+          `}
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    console.error('Load error:', err);
+  }
+}
+
+// ---- Update status ----
+async function updateStatus(id, status) {
+  try {
+    const res = await fetch(API_BASE + '/api/pincode-requests/' + id, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      loadStats();
+      loadRequests();
+    }
+  } catch (err) {
+    console.error('Update error:', err);
+  }
+}
+</script>
+
+</body>
+</html>
