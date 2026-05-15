@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pincode Portal · Hive Frontline</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --royal:    #1B2A6B;
+      --navy:     #0E1740;
+      --red:      #C8102E;
+      --green:    #0A7C4A;
+      --gold:     #96700A;
+      --bg:       #F6F7FB;
+      --border:   #E2E5EF;
+      --text:     #1A1D26;
+      --dim:      #6B7280;
+      --white:    #FFFFFF;
+      --mono:     'JetBrains Mono', monospace;
+      --sans:     'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Topbar ── */
+    .topbar {
+      background: var(--navy);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .topbar-inner {
+      display: flex; align-items: center; gap: 14px;
+      max-width: 640px; margin: 0 auto;
+      padding: 14px 20px 10px;
+    }
+    .topbar-logo {
+      height: 34px; width: auto;
+    }
+    .topbar-divider {
+      width: 1px; height: 28px; background: rgba(255,255,255,0.18);
+    }
+    .topbar-title {
+      display: flex; flex-direction: column;
+    }
+    .topbar-title span:first-child {
+      font-size: 14px; font-weight: 700; color: var(--white); letter-spacing: 0.01em;
+    }
+    .topbar-title span:last-child {
+      font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.5); letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .topbar-accent {
+      height: 3px; background: var(--red);
+    }
+
+    /* ── Tab nav ── */
+    .tab-nav {
+      background: var(--navy);
+      display: flex; max-width: 640px; margin: 0 auto;
+      padding: 0 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .tab-btn {
+      background: none; border: none; cursor: pointer;
+      font-family: var(--sans); font-size: 12px; font-weight: 600;
+      color: rgba(255,255,255,0.45); letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 10px 16px 8px;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .tab-btn.active {
+      color: var(--white);
+      border-bottom-color: var(--red);
+    }
+    .tab-btn:hover:not(.active) { color: rgba(255,255,255,0.75); }
+
+    /* ── Main ── */
+    .main {
+      max-width: 640px; margin: 0 auto;
+      padding: 28px 20px 60px;
+    }
+
+    /* ── Hero card ── */
+    .hero {
+      background: linear-gradient(135deg, var(--royal) 0%, var(--navy) 100%);
+      border-radius: 14px; padding: 24px 28px;
+      margin-bottom: 24px;
+    }
+    .hero h1 { font-size: 20px; font-weight: 700; color: var(--white); margin-bottom: 6px; }
+    .hero p  { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.55; }
+
+    /* ── Alert ── */
+    .alert {
+      display: none; align-items: flex-start; gap: 10px;
+      padding: 14px 16px; border-radius: 10px;
+      font-size: 13px; line-height: 1.5; margin-bottom: 20px;
+    }
+    .alert.show { display: flex; }
+    .alert-success { background: #EDFAF3; border: 1px solid #A7E9C7; color: #0A5C36; }
+    .alert-error   { background: #FEF2F2; border: 1px solid #FECACA; color: #991B1B; }
+    .alert-icon { font-size: 16px; flex-shrink: 0; }
+
+    /* ── Form card ── */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+
+    /* ── Step indicator ── */
+    .steps {
+      display: flex; align-items: center; gap: 0;
+      margin-bottom: 22px;
+    }
+    .step-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      flex-shrink: 0;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+    }
+    .step-dot.active   { background: var(--royal); color: var(--white); }
+    .step-dot.done     { background: var(--green); color: var(--white); }
+    .step-dot.inactive { background: var(--white); color: var(--dim); border: 2px solid var(--border); }
+    .step-line {
+      flex: 1; height: 2px;
+      background: var(--border);
+      transition: background 0.2s;
+    }
+    .step-line.done { background: var(--green); }
+
+    /* ── Section heading ── */
+    .section-head {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 18px;
+    }
+    .section-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: #EEF1FB; display: flex; align-items: center;
+      justify-content: center; font-size: 16px; flex-shrink: 0;
+    }
+    .section-head h2 { font-size: 15px; font-weight: 700; color: var(--text); }
+    .section-head p  { font-size: 12px; color: var(--dim); margin-top: 2px; }
+
+    /* ── Form fields ── */
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block; font-size: 11px; font-weight: 600;
+      color: var(--dim); letter-spacing: 0.07em; text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .input-wrap { position: relative; }
+    .input-wrap input {
+      width: 100%; padding: 11px 42px 11px 14px;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      font-family: var(--mono); font-size: 14px; color: var(--text);
+      background: var(--bg);
+      outline: none; transition: border-color 0.15s, background 0.15s;
+    }
+    .input-wrap input:focus { border-color: var(--royal); background: var(--white); }
+    .input-wrap .lookup-btn {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      font-size: 17px; color: var(--dim);
+      transition: color 0.15s;
+    }
+    .input-wrap .lookup-btn:hover { color: var(--royal); }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    .select-wrap select {
+      width: 100%; padding: 11px 14px;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      font-family: var(--sans); font-size: 14px; color: var(--text);
+      background: var(--bg); outline: none;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+    .select-wrap select:focus { border-color: var(--royal); background: var(--white); }
+    .select-wrap select:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Employee found / not found card ── */
+    .emp-card {
+      display: none; border-radius: 10px; padding: 14px 16px;
+      margin-top: 10px; border: 1.5px solid;
+    }
+    .emp-card.found {
+      background: #EDFAF3; border-color: #A7E9C7;
+      display: block;
+    }
+    .emp-card.not-found {
+      background: #FEF2F2; border-color: #FECACA;
+      display: block;
+    }
+    .emp-card .emp-name {
+      font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px;
+    }
+    .emp-card.not-found .emp-name { color: #B91C1C; }
+    .emp-card .emp-meta { font-size: 12px; color: var(--dim); }
+    .emp-card .emp-meta span { margin-right: 10px; }
+    .badge {
+      display: inline-block; padding: 2px 8px;
+      border-radius: 20px; font-size: 11px; font-weight: 600;
+    }
+    .badge-role   { background: #EEF1FB; color: var(--royal); }
+    .badge-state  { background: #FFF3E0; color: #92400E; }
+
+    /* ── Disabled step ── */
+    .step2-section { opacity: 0.45; pointer-events: none; transition: opacity 0.25s; }
+    .step2-section.unlocked { opacity: 1; pointer-events: all; }
+
+    /* ── Submit btn ── */
+    .btn-submit {
+      width: 100%; padding: 14px;
+      background: var(--royal); color: var(--white);
+      border: none; border-radius: 10px;
+      font-family: var(--sans); font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: background 0.15s, opacity 0.15s;
+      margin-top: 4px;
+    }
+    .btn-submit:hover:not(:disabled) { background: #152060; }
+    .btn-submit:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-submit.loading { opacity: 0.75; }
+
+    /* ── Admin panel ── */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 12px; margin-bottom: 24px;
+    }
+    .stat-card {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px 14px; text-align: center;
+    }
+    .stat-card .stat-val {
+      font-size: 26px; font-weight: 700; color: var(--royal);
+      font-family: var(--mono);
+    }
+    .stat-card .stat-lbl {
+      font-size: 11px; color: var(--dim); margin-top: 3px;
+      text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .stat-card.pending .stat-val  { color: #B45309; }
+    .stat-card.approved .stat-val { color: var(--green); }
+    .stat-card.rejected .stat-val { color: var(--red); }
+
+    .filter-row {
+      display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 6px 14px; border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: var(--white); color: var(--dim);
+      font-family: var(--sans); font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .filter-btn.active { background: var(--royal); color: var(--white); border-color: var(--royal); }
+    .filter-btn:hover:not(.active) { border-color: var(--royal); color: var(--royal); }
+
+    .requests-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid var(--border); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      background: #F0F2FA; padding: 10px 14px;
+      text-align: left; font-size: 11px; font-weight: 600;
+      color: var(--dim); text-transform: uppercase; letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #F9FAFB; }
+    tbody td { padding: 12px 14px; vertical-align: middle; }
+    .td-code { font-family: var(--mono); font-size: 12px; color: var(--dim); }
+    .td-pin  { font-family: var(--mono); font-weight: 600; }
+
+    .status-badge {
+      display: inline-block; padding: 3px 9px;
+      border-radius: 20px; font-size: 11px; font-weight: 600;
+    }
+    .status-pending  { background: #FEF3C7; color: #92400E; }
+    .status-approved { background: #D1FAE5; color: #065F46; }
+    .status-rejected { background: #FEE2E2; color: #991B1B; }
+
+    .action-btns { display: flex; gap: 6px; }
+    .btn-approve, .btn-reject, .btn-revert {
+      padding: 5px 10px; border-radius: 6px; border: none;
+      font-family: var(--sans); font-size: 11px; font-weight: 600;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .btn-approve { background: #D1FAE5; color: #065F46; }
+    .btn-reject  { background: #FEE2E2; color: #991B1B; }
+    .btn-revert  { background: #EEF1FB; color: var(--royal); }
+    .btn-approve:hover { background: #A7F3D0; }
+    .btn-reject:hover  { background: #FECACA; }
+    .btn-revert:hover  { background: #D9DFFB; }
+
+    .empty-state {
+      text-align: center; padding: 48px 20px; color: var(--dim);
+    }
+    .empty-state .icon { font-size: 32px; margin-bottom: 10px; }
+    .empty-state p { font-size: 13px; }
+
+    .admin-loading {
+      text-align: center; padding: 40px; color: var(--dim); font-size: 13px;
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .field-row  { grid-template-columns: 1fr; }
+      .main { padding: 20px 16px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Topbar ── -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <img class="topbar-logo"
+      src="https://www.britishbiologicals.com/wp-content/uploads/2022/05/cropped-bb-logo.png"
+      alt="British Biologicals"
+      onerror="this.style.display='none'" />
+    <div class="topbar-divider"></div>
+    <div class="topbar-title">
+      <span>Pincode Portal</span>
+      <span>Hive Frontline</span>
+    </div>
+  </div>
+  <div class="topbar-accent"></div>
+</div>
+
+<!-- ── Tab nav ── -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('request')">📍 Request</button>
+  <button class="tab-btn"        onclick="switchTab('admin')">🛠 Admin</button>
+</div>
+
+<!-- ── Main ── -->
+<div class="main">
+
+  <!-- REQUEST TAB -->
+  <div id="tab-request" class="tab-content active">
+
+    <div class="hero">
+      <h1>Request a New Area Pincode</h1>
+      <p>Enter your Employee ID to get started. Your details will be auto-filled from the system. Then just enter the pincode and area you need added.</p>
+    </div>
+
+    <div id="submit-alert" class="alert"></div>
+
+    <!-- Step 1 -->
+    <div class="card">
+      <div class="steps">
+        <div id="dot1" class="step-dot active">1</div>
+        <div id="line1" class="step-line"></div>
+        <div id="dot2" class="step-dot inactive">2</div>
+      </div>
+
+      <div class="section-head">
+        <div class="section-icon">🪪</div>
+        <div>
+          <h2>Identify Yourself</h2>
+          <p>Enter your Employee Code to auto-fill your details</p>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Employee Code</label>
+        <div class="input-wrap">
+          <input id="emp-code" type="text" placeholder="e.g. EC7093"
+            oninput="onEmpInput(this.value)"
+            onkeydown="if(event.key==='Enter') lookupEmployee()" />
+          <button class="lookup-btn" onclick="lookupEmployee()" title="Look up">🔍</button>
+        </div>
+        <div id="emp-result"></div>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="step2-section" class="card step2-section">
+      <div class="steps">
+        <div id="dot1b" class="step-dot done">✓</div>
+        <div id="line1b" class="step-line done"></div>
+        <div id="dot2b" class="step-dot active">2</div>
+      </div>
+
+      <div class="section-head">
+        <div class="section-icon">📍</div>
+        <div>
+          <h2>Pincode Details</h2>
+          <p>Enter the pincode and area you want added</p>
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Pincode</label>
+          <div class="input-wrap">
+            <input id="pincode" type="text" placeholder="e.g. 560011"
+              maxlength="6" oninput="this.value=this.value.replace(/\D/g,'')" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Area / Locality</label>
+          <div class="select-wrap" id="area-select-wrap" style="display:none">
+            <select id="area-select"><option value="">Select area…</option></select>
+          </div>
+          <div class="input-wrap" id="area-input-wrap">
+            <input id="area-name" type="text" placeholder="e.g. Jayanagar" />
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>State</label>
+        <div class="input-wrap">
+          <input id="state-display" type="text" readonly
+            style="cursor:default; background:#F0F2FA; color:var(--dim);" />
+        </div>
+      </div>
+
+      <button id="submit-btn" class="btn-submit" onclick="submitRequest()">
+        Submit Request
+      </button>
+    </div>
+
+  </div><!-- /REQUEST TAB -->
+
+  <!-- ADMIN TAB -->
+  <div id="tab-admin" class="tab-content">
+
+    <div class="hero" style="margin-bottom:24px">
+      <h1>Admin Panel</h1>
+      <p>Review and action pincode requests from field MRs.</p>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val" id="stat-total">—</div>
+        <div class="stat-lbl">Total</div>
+      </div>
+      <div class="stat-card pending">
+        <div class="stat-val" id="stat-pending">—</div>
+        <div class="stat-lbl">Pending</div>
+      </div>
+      <div class="stat-card approved">
+        <div class="stat-val" id="stat-approved">—</div>
+        <div class="stat-lbl">Approved</div>
+      </div>
+      <div class="stat-card rejected">
+        <div class="stat-val" id="stat-rejected">—</div>
+        <div class="stat-lbl">Rejected</div>
+      </div>
+    </div>
+
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="filterRequests('all', this)">All</button>
+      <button class="filter-btn" onclick="filterRequests('pending', this)">Pending</button>
+      <button class="filter-btn" onclick="filterRequests('approved', this)">Approved</button>
+      <button class="filter-btn" onclick="filterRequests('rejected', this)">Rejected</button>
+    </div>
+
+    <div id="admin-loading" class="admin-loading">Loading requests…</div>
+
+    <div id="requests-container" style="display:none">
+      <div class="requests-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Pincode</th>
+              <th>Area</th>
+              <th>State</th>
+              <th>MR</th>
+              <th>Territory</th>
+              <th>Status</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="requests-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="empty-state" class="empty-state" style="display:none">
+      <div class="icon">📭</div>
+      <p>No requests found.</p>
+    </div>
+
+  </div><!-- /ADMIN TAB -->
+
+</div><!-- /MAIN -->
+
+<script>
+// ─────────────────────────────────────────────
+//  EMPLOYEE DATABASE  (411 employees · May 2026)
+// ─────────────────────────────────────────────
+const EMP_DB = {
+  "BBPT1048": { name: "Betapudi Raju", role: "BO", territory: "BB ELURU BO 1", hq: "—", state: "Andhra Pradesh" },
+  "EC1696": { name: "Mohammad khalid", role: "ABM", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC2831": { name: "Chavitipalli satish", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC3709": { name: "Shaik noor mohammad", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC3845": { name: "Manchala ramana", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC4028": { name: "Lovaraju M", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC512": { name: "K.Appa Rao", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC5619": { name: "Anguraj", role: "ABM", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC6300": { name: "Khandavalli raju", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC639": { name: "Chigilipalli prasad", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC718": { name: "V. Sasidhar", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC7638": { name: "Shaik gousi", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC8308": { name: "Ramesh bogila", role: "ABM", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC8435": { name: "Kanchipati simhachalam naidu", role: "—", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC8844": { name: "Sanapala suresh babu", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC8869": { name: "Shek shamshuddin", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC9043": { name: "Kunduru venkata veeranjaneya reddy", role: "ABM", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC9078": { name: "S Ravindra Naik", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC9247": { name: "Srikakulam venkatesh", role: "—", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC9248": { name: "Vadde Upendra", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC9257": { name: "Neyyila Suresh", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC9346": { name: "Shaik mohammed gouse", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC9347": { name: "Chebrolu srinivas rao", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC9472": { name: "Immadishetty Sai Pavan", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC9545": { name: "Somisetty Surya Teja", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC9558": { name: "Polisetty Venkata Satish", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC9589": { name: "P Venkata Ashok Kumar", role: "ABM", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC9592": { name: "Balagani Siva Sankar", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC9603": { name: "Shaik Sadik Vali", role: "ABM", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC9644": { name: "Mohammed Tajuddin", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC9650": { name: "Doolla Adi Siva Satya Sri Venkata Sitarama Swamy", role: "ABM", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC9672": { name: "Boya Chandra Sekhar", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC9693": { name: "Gali Anand", role: "BO", territory: "—", hq: "—", state: "Andhra Pradesh" },
+  "EC9988": { name: "Inti Venkata Druga Manikanta", role: "BO", territory: "BB KAKINADA BO 2", hq: "—", state: "Andhra Pradesh" },
+  "BBPT1002": { name: "Wasim Shamshuddin Harekar", role: "ABM", territory: "-", hq: "—", state: "Goa" },
+  "BBPT1004": { name: "Yashavant Mahadev Parit", role: "BO", territory: "BB GOA BO 3", hq: "—", state: "Goa" },
+  "BBPT1043": { name: "Mangesh Balaso Bhalekar", role: "BO", territory: "BB GOA BO 4", hq: "—", state: "Goa" },
+  "EC9560": { name: "Santosh Krishna londhe", role: "BO", territory: "BB GOA BO 1", hq: "—", state: "Goa" },
+  "BB9984": { name: "Nagesha", role: "BO", territory: "BB CHIKKABALLAPUR BO", hq: "—", state: "Karnataka" },
+  "BBPT1015": { name: "Sampath K S", role: "BO", territory: "BB MANGALORE BO 4", hq: "—", state: "Karnataka" },
+  "BBPT1019": { name: "Mohammed Asif", role: "BO", territory: "BB RAICHUR BO", hq: "—", state: "Karnataka" },
+  "EC517": { name: "P. S. Sathyanarayana rao", role: "BO", territory: "BB KOLAR BO 1", hq: "Kolar", state: "Karnataka" },
+  "EC527": { name: "Shridhar v kale", role: "BO", territory: "BB BELGAUM BO 2", hq: "Belgaum", state: "Karnataka" },
+  "EC7093": { name: "Chaluvaraj m k", role: "RBM", territory: "—", hq: "Mysore", state: "Karnataka" },
+  "EC7230": { name: "Nauman khan", role: "ABM", territory: "—", hq: "Davangere", state: "Karnataka" },
+  "EC7295": { name: "Abdul rehman imamsab chandavar", role: "BO", territory: "BB SIRSI BO", hq: "Sirsi", state: "Karnataka" },
+  "EC7452": { name: "Shaik gousoddin", role: "BO", territory: "BB GULBARGA BO", hq: "Gulbarga", state: "Karnataka" },
+  "EC7654": { name: "Thareeq", role: "ABM", territory: "—", hq: "Mysore", state: "Karnataka" },
+  "EC7850": { name: "Manjunatha J M", role: "BO", territory: "BB HASSAN BO 2", hq: "Hassan", state: "Karnataka" },
+  "EC8027": { name: "Naveen k", role: "ABM", territory: "—", hq: "Mysore", state: "Karnataka" },
+  "EC8127": { name: "Ranjith reddy T R", role: "BO", territory: "BB SHIMOGA BO 3", hq: "Shimoga", state: "Karnataka" },
+  "EC8262": { name: "Raj kumar", role: "BO", territory: "BB BIDAR BO 1", hq: "Bidar", state: "Karnataka" },
+  "EC8284": { name: "Manjunath soolya shetty", role: "ABM", territory: "—", hq: "Mangalore", state: "Karnataka" },
+  "EC8285": { name: "Rajitha", role: "BO", territory: "BB UDUPI BO", hq: "Udupi", state: "Karnataka" },
+  "EC8441": { name: "Asif M. Momin", role: "ABM", territory: "—", hq: "Gulbarga", state: "Karnataka" },
+  "EC8442": { name: "Allabhksh mulla", role: "BO", territory: "BB HUBLI BO 1", hq: "Hubli", state: "Karnataka" },
+  "EC8913": { name: "Sunil kumar G S", role: "BO", territory: "BB MYSORE BO 5", hq: "Mysore", state: "Karnataka" },
+  "EC8956": { name: "Ambedkar N", role: "ABM", territory: "—", hq: "Chikkaballapur", state: "Karnataka" },
+  "EC9027": { name: "Mohan Kumar G", role: "BO", territory: "BB MYSORE BO 2", hq: "Mysore", state: "Karnataka" },
+  "EC9028": { name: "Chethan kumar n m", role: "BO", territory: "BB DAVANGERE BO 1", hq: "Davangere", state: "Karnataka" },
+  "EC9238": { name: "Kiran R", role: "BO", territory: "BB MYSORE BO 6", hq: "Mysore", state: "Karnataka" },
+  "EC9341": { name: "Raghavendra Urs P", role: "BO", territory: "BB MYSORE BO 4", hq: "Mysore", state: "Karnataka" },
+  "EC9438": { name: "Manohara P", role: "BO", territory: "BB MYSORE BO 1", hq: "Mysore", state: "Karnataka" },
+  "EC9469": { name: "Vijay Kulkarni", role: "BO", territory: "BB BIJAPUR BO 1", hq: "Bijapur", state: "Karnataka" },
+  "EC9531": { name: "Ramesh E", role: "BO", territory: "BB TUMKUR BO 1", hq: "Tumkur", state: "Karnataka" },
+  "EC9637": { name: "Darshan T Y", role: "BO", territory: "BB TUMKUR BO 2", hq: "Tumkur", state: "Karnataka" },
+  "EC9663": { name: "Vinayak Manohar Patil", role: "BO", territory: "BB BELGAUM BO 1", hq: "Belgaum", state: "Karnataka" },
+  "EC9677": { name: "Arun Kumar P", role: "BO", territory: "BB MANDYA BO 2", hq: "Mandya", state: "Karnataka" },
+  "EC9691": { name: "T Sangamesh", role: "BO", territory: "BB DAVANGERE BO 3", hq: "Davangere", state: "Karnataka" },
+  "EC9721": { name: "Waseem Akram W", role: "BO", territory: "BB BELLARY BO", hq: "Bellary", state: "Karnataka" },
+  "EC9786": { name: "Sanjeev Mulagund", role: "RBM", territory: "—", hq: "North Karnataka", state: "Karnataka" },
+  "EC9810": { name: "Preetham B R", role: "BO", territory: "BB MANDYA BO 1", hq: "Mandya", state: "Karnataka" },
+  "EC9870": { name: "Darshan S", role: "BO", territory: "BB SHIMOGA BO 1", hq: "Shimoga", state: "Karnataka" },
+  "EC9920": { name: "Parvath Gowda K", role: "BO", territory: "⚠ No geo", hq: "Davangere", state: "Karnataka" },
+  "EC9927": { name: "Deekshith Ameen U", role: "BO", territory: "BB MANGALORE BO 2", hq: "Mangalore", state: "Karnataka" },
+  "EC9928": { name: "K U Rakesh", role: "BO", territory: "⚠ No geo", hq: "Davangere", state: "Karnataka" },
+  "EC9937": { name: "Vishwanath Angadi", role: "ABM", territory: "—", hq: "Hubli", state: "Karnataka" },
+  "EC9944": { name: "Prashanth P", role: "BO", territory: "BB MYSORE BO 3", hq: "Mysore", state: "Karnataka" },
+  "EC9948": { name: "MD Amer Bin", role: "BO", territory: "BB GULBARGA BO 2", hq: "Gulbarga", state: "Karnataka" },
+  "EC9955": { name: "Sunil S Kubasad", role: "BO", territory: "BB HUBLI BO 2", hq: "Hubli", state: "Karnataka" },
+  "EC9964": { name: "Anji N", role: "BO", territory: "⚠ No geo", hq: "Chikkaballapur", state: "Karnataka" },
+  "EC9967": { name: "Harshith", role: "BO", territory: "BB MANGALORE BO 3", hq: "Mangalore", state: "Karnataka" },
+  "EC9990": { name: "Rudragouda Patil", role: "ABM", territory: "-", hq: "—", state: "Karnataka" },
+  "EC9993": { name: "Rajshekhar Harish Yaligar", role: "BO", territory: "BB HAVERI BO", hq: "—", state: "Karnataka" },
+  "EC9994": { name: "Harshith M K", role: "BO", territory: "BB HASSAN BO 1", hq: "—", state: "Karnataka" },
+  "EC9998": { name: "Chiranjivi Hanumathappa Bellary", role: "BO", territory: "BB DAVANGERE BO 2", hq: "—", state: "Karnataka" },
+  "EC9999": { name: "Iranna Guralingappa Malekoppa", role: "BO", territory: "BB GADAG BO", hq: "—", state: "Karnataka" },
+  "EMP001": { name: "Arshad Sutar", role: "ABM", territory: "—", hq: "—", state: "Karnataka" },
+  "EMP002": { name: "Benjamin Joseph", role: "BO", territory: "—", hq: "—", state: "Karnataka" },
+  "EMP003": { name: "Raksha Jain", role: "BO", territory: "—", hq: "—", state: "Karnataka" },
+  "HO001": { name: "Ranjith Menon", role: "HO", territory: "-", hq: "—", state: "Karnataka" },
+  "HO002": { name: "Yanamadala Lovaraju", role: "HO", territory: "-", hq: "—", state: "Karnataka" },
+  "HO003": { name: "Thirupala Reddy", role: "HO", territory: "-", hq: "—", state: "Karnataka" },
+  "HO004": { name: "Praveen G S", role: "HO", territory: "-", hq: "—", state: "Karnataka" },
+  "BBPT1007": { name: "Joel M J", role: "BO", territory: "BB ERNAKULAM BO 2", hq: "—", state: "Kerala" },
+  "EC2140": { name: "Anas", role: "ABM", territory: "—", hq: "—", state: "Kerala" },
+  "EC3651": { name: "Arun matew", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC515": { name: "Praveen kumar", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC5583": { name: "Runa elizabeth", role: "Dietician", territory: "—", hq: "—", state: "Kerala" },
+  "EC5589": { name: "Thoufeek", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC5672": { name: "Pramod .P", role: "ABM", territory: "—", hq: "—", state: "Kerala" },
+  "EC577": { name: "Saju", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC6265": { name: "Babu joun", role: "—", territory: "—", hq: "—", state: "Kerala" },
+  "EC6953": { name: "Sushin C", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC7160": { name: "Alex francis", role: "—", territory: "—", hq: "—", state: "Kerala" },
+  "EC7478": { name: "Divya M P", role: "Dietician", territory: "—", hq: "—", state: "Kerala" },
+  "EC7694": { name: "Aloshious K Joyson", role: "—", territory: "—", hq: "—", state: "Kerala" },
+  "EC7745": { name: "Aswathy sukumaran", role: "—", territory: "—", hq: "—", state: "Kerala" },
+  "EC7822": { name: "Jayakrishnan K G", role: "—", territory: "—", hq: "—", state: "Kerala" },
+  "EC8225": { name: "Arun P chandran", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC8369": { name: "Anas francis", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC8386": { name: "Probin kumar m v", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC8465": { name: "Jayasankar", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC8490": { name: "Shibil marshood", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC8548": { name: "Linson M", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC8563": { name: "Teena varghese", role: "Dietician", territory: "—", hq: "—", state: "Kerala" },
+  "EC8640": { name: "Saran .K.P", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC8874": { name: "Adhwaid Prabhu K P", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC9012": { name: "Nithin Raveendran", role: "ABM", territory: "—", hq: "—", state: "Kerala" },
+  "EC9136": { name: "Abin Raj P R", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC9154": { name: "Sreelakshmi T A", role: "Dietician", territory: "—", hq: "—", state: "Kerala" },
+  "EC9256": { name: "Jimin k. J", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC9319": { name: "Suhail. M.b", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC9396": { name: "Ashams Dilip", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC9406": { name: "Saritha C N", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC9421": { name: "Shailesh A", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC9432": { name: "Muhammad Nihal Ump", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC9487": { name: "Ligimol P U", role: "—", territory: "—", hq: "—", state: "Kerala" },
+  "EC9492": { name: "Mohamed Ashiq S", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC9495": { name: "Jeevan T Dharan", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC9501": { name: "Sreerag K", role: "—", territory: "—", hq: "—", state: "Kerala" },
+  "EC9504": { name: "Sarath Babu", role: "ABM", territory: "—", hq: "—", state: "Kerala" },
+  "EC9527": { name: "Abhilash S", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC9539": { name: "Vishnu M", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC9548": { name: "Harikrishnan A S", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC9610": { name: "Leo Thomas", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC9635": { name: "Vyshnav P", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC9685": { name: "Vinesh A", role: "ABM", territory: "—", hq: "—", state: "Kerala" },
+  "EC9714": { name: "Rajesh K", role: "RBM", territory: "—", hq: "—", state: "Kerala" },
+  "EC9730": { name: "Biju N M", role: "ABM", territory: "—", hq: "—", state: "Kerala" },
+  "EC9732": { name: "Anil Kumar Raghuvaran Nair", role: "RBM", territory: "—", hq: "—", state: "Kerala" },
+  "EC9766": { name: "Amal Saseendran", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC9807": { name: "Ajayaghosh C P", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC9848": { name: "Akhil Chandran", role: "—", territory: "—", hq: "—", state: "Kerala" },
+  "EC9879": { name: "Aneesh K", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "EC9947": { name: "Dilip M V", role: "BO", territory: "—", hq: "—", state: "Kerala" },
+  "BBPT1020": { name: "Onkar Shankar Ghatage", role: "BO", territory: "BB KOLHAPUR BO 2", hq: "—", state: "Maharashtra" },
+  "BBPT1027": { name: "Pradeep Kumar Samalashankar Gupta", role: "BO", territory: "BB CENTRAL MUMBAI BO 5", hq: "—", state: "Maharashtra" },
+  "BBPT1031": { name: "Shifa Murtuza Ansari", role: "BO", territory: "BB VASHI BO 5", hq: "—", state: "Maharashtra" },
+  "BBPT1037": { name: "Vikas Ram Lakhan Gupta", role: "ABM", territory: "-", hq: "—", state: "Maharashtra" },
+  "EC2739": { name: "Rohini sachin shinde", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC2858": { name: "Vilas Mirge", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC2924": { name: "Dhananjay mahendra singh", role: "ABM", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC3758": { name: "Yogesh popatrao sonawane", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC4269": { name: "Qazi sameeroddin jalaloddin", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC4539": { name: "Rizwan khan sadik khan", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC5042": { name: "Prabhat jaishwal", role: "ABM", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC5385": { name: "Kashinath ramu chavan", role: "ABM", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC5638": { name: "Ashok kumar parasnath", role: "RBM", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC5639": { name: "Vinaykumar ramchandra pandey", role: "RBM", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC5676": { name: "Rishi kumar yadav", role: "ABM", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC5720": { name: "Rupesh S Thange", role: "ABM", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC5797": { name: "Niranjan dundapa katakoli", role: "RBM", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC5924": { name: "Siddhesh vilas surve", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC6264": { name: "Pravin kumar singh", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC6365": { name: "Amar bahadur yadav", role: "ABM", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC6552": { name: "Sushil ramji tiwari", role: "ABM", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC6703": { name: "Azaz ahmed khan", role: "ABM", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC6716": { name: "Vishwas tiwari", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC6846": { name: "Sandeep dubey", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC6971": { name: "Shamim ahamad khan", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC7015": { name: "Malusare sagar maruti", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC7161": { name: "Rahul kedar gupta", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC7437": { name: "Akhil H shende", role: "RBM", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC7439": { name: "Vinaykumar m deulkar", role: "ABM", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC7496": { name: "Janardan ganesh mhatre", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC7498": { name: "Sarfaraz ansari", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC7530": { name: "Pankaj mukhlal chaurasia", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC7565": { name: "Swapnil mahadev mulik", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC7660": { name: "Mobeen farooqui", role: "ABM", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC7741": { name: "Durgeshwari rathod", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC7781": { name: "Mujahed khan rafique khan", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC7937": { name: "Sameer dawar", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8006": { name: "Rajkumar kshirod goldar", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8017": { name: "Manoj kumar ramjeet yadav", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8078": { name: "Omprakash gupta", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8094": { name: "Arunkumar goswami yadao", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8098": { name: "Tanuja ishwar patil", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8344": { name: "Rameshwar dattatray bhandare", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8361": { name: "Pathan shoeb khan abdul", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8399": { name: "Anand trimbak ugale", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8408": { name: "Ramdas daulat jethe", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8410": { name: "Rohan nandadeep parab", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8412": { name: "Vaishnavi satyaprakash gupta", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8414": { name: "Ritesh arvind kumawat", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8438": { name: "Jafir jahir shaikh", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8495": { name: "Tejas anil gadave", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8560": { name: "Ankit dixit", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8600": { name: "Shubham devidas kadam", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8693": { name: "Priyanka abasaheb patil", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8750": { name: "Namit sunil shukla", role: "ABM", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8881": { name: "Santosh ramesh chavhan", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8895": { name: "Anjali lalbahadur yadav", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8909": { name: "Anand jayprakash dixit", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8949": { name: "Ashish kumar p yadav", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC8994": { name: "Mohammad jabir ansari", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9052": { name: "Vivek kumar", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9129": { name: "Nadeem mohammedgous shaikh", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9203": { name: "Gautam jaiwar", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9205": { name: "Ashutosh Kamalashankar Pandey", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9206": { name: "Deepoo pandey", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9207": { name: "Chandan Shivshyam Dubey", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9208": { name: "Dilip yadav", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9219": { name: "Aftab Alam Khan", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9220": { name: "Omprakash dubey", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9273": { name: "Sudhir mandal", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9274": { name: "Kishan mishra", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9358": { name: "Hemant ramesh sule", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9381": { name: "Rajesh Panditrao Wankhede", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9400": { name: "Sagar Dipakrao nidhankar", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9403": { name: "Pratik Diwakar Dawhekar", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9420": { name: "Vipin Kumar Pandey", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9426": { name: "Sajid Mahamadhusen Batvegar", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9429": { name: "Shekar Chiranjeevi Jha", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9450": { name: "Rushikesh Narayan Tayde", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9456": { name: "Tilesh Dhruvaraj Singh", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9488": { name: "Akshay Arun Gaikwad", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9512": { name: "Rohit Sambhaji Rathod", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9518": { name: "Gaurav Ramesh Bohare", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9520": { name: "Sitaram Nagnath Ghawad", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9598": { name: "Adarsh Vinod Pandey", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9619": { name: "Viplav Santprakash Mishra", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9659": { name: "Nehapravin Moinullah Siddique", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9667": { name: "Yogita Rakesh Sonwane", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9706": { name: "Nitesh Kumar Chaurasiya", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9722": { name: "Nitin Dattatraya Purane", role: "ABM", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9744": { name: "Pankaj Benbanshi", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9746": { name: "Kanchan Nilesh Jadhav", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9751": { name: "Khan Muheet Abdur Rauf", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9768": { name: "Jayesh Ravindra Patil", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9776": { name: "Kailas Sanjay Salve", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9803": { name: "Suhana Firoz Khan", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9811": { name: "Kadar mahamad rafik Tamboli", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9816": { name: "Syed Awes Syed Aqueel", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9832": { name: "Mahesh Srikant Magadum", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9845": { name: "Vyankati Khandu Irpe", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9855": { name: "Mehboob Kampali", role: "ABM", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9862": { name: "Faiz Nahed Shaikh", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9883": { name: "Wahidoddin Saifoddin Khoriwale", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9904": { name: "Suraj Namdev Lohar", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9913": { name: "Bhoite Rutvik Gajanan", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9914": { name: "Gaurav rameshchandra Tiwari", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9929": { name: "Pravin Raghunath Kalkar", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9958": { name: "Chandan Kumar Ramnaresh Chaudhari", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9966": { name: "Mayur Vishwanath Chavan", role: "—", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9970": { name: "Ritesh Kumar", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "EC9991": { name: "Vishal Namdeorao Hudk", role: "ABM", territory: "-", hq: "—", state: "Maharashtra" },
+  "EC9992": { name: "Sauarbh Ashok Sonawane", role: "BO", territory: "BB SANGAMNER BO", hq: "—", state: "Maharashtra" },
+  "EC9996": { name: "Yash Jaiprakash Chauhan", role: "BO", territory: "BB KALYAN BO 4", hq: "—", state: "Maharashtra" },
+  "EC6708": { name: "Rakesh kedar gupta", role: "BO", territory: "—", hq: "—", state: "Maharashtra" },
+  "BBPT1005": { name: "Saravana Murugan", role: "BO", territory: "BB TIRUNELVELI BO 2", hq: "—", state: "Tamil Nadu" },
+  "BBPT1023": { name: "Navaneethakrishnana Nagarajan", role: "ABM", territory: "-", hq: "—", state: "Tamil Nadu" },
+  "BBPT1025": { name: "Francies David M", role: "BO", territory: "BB CHENNAI BO 8", hq: "—", state: "Tamil Nadu" },
+  "BBPT1056": { name: "Logeshwaran Senthilkumar", role: "BO", territory: "BB RAMANATHAPURAM BO", hq: "—", state: "Tamil Nadu" },
+  "EC5857": { name: "Karthick Ganesan", role: "ZBM", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC6656": { name: "Pricillapriy darshini k", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC6700": { name: "Prabhakaran P", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC6818": { name: "Manobalan vengadesan", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC684": { name: "R. Selvakumar", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC7045": { name: "Karthik G", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC7155": { name: "K M azarudeen", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC7171": { name: "V kirubaharan", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC7172": { name: "T sathishkumar", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC7195": { name: "K Govindan", role: "ABM", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC7301": { name: "Sivabalan R", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC7418": { name: "Senthilkumar P", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC7773": { name: "Jegan m", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC7867": { name: "Yuvaraj velusamy", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC8007": { name: "Yuvaraj senthilkumar", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC8101": { name: "Ramesh", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC8193": { name: "Ravichanthiran velayutham", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC8320": { name: "T. G. Hariram", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC8366": { name: "Karthik", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC8620": { name: "Jehin durai devadhasan", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC8687": { name: "Arivukkarasu patamasivam", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC8788": { name: "Thangaraj", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC8842": { name: "Vellai chamy R", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC8854": { name: "G sri prasanna", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC8865": { name: "Karthikeyan k", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC8899": { name: "Nagarajan", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9003": { name: "Jagadish T", role: "ABM", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9153": { name: "Sirpiyan", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9158": { name: "Ganapathy U", role: "ZBM", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9231": { name: "Akash a", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9233": { name: "Sugiban stephen", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9234": { name: "L. Ananth", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9237": { name: "Vignesh velayutham", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9359": { name: "G.surender", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9395": { name: "Praveen Senan Chandra Senan", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9399": { name: "Vignesh Sankar Prashanth S", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9410": { name: "Arun Kumar Ayyappan", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9413": { name: "Arunprakash Ramasamy", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9415": { name: "P Pandiarajan", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9441": { name: "Jagadeesan Rajasekar", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9458": { name: "Mohammed Ansari Raja M", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9470": { name: "S Datagiri Badusha", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9481": { name: "Franklin Selvaraj", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9486": { name: "Lokeshwar K", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9494": { name: "Mohamed Ismail J", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9496": { name: "Jude Daniel I", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9505": { name: "Thamizhselvan", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9524": { name: "Vinodhan", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9577": { name: "Amirtharajkumar Allimuthu", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9629": { name: "E Emmanuel", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9684": { name: "Pradeesh Padmanaban", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9696": { name: "Rajesh D", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9704": { name: "Prakash G", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9717": { name: "S Manivasagam", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9723": { name: "V P Sivaprasad", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9738": { name: "Divya R", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9740": { name: "Paandi Selvam", role: "ABM", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9741": { name: "S Vignesh", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9747": { name: "Kannan Purushothaman", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9770": { name: "S Nambu Selvam", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9787": { name: "V K Ramachandran", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9798": { name: "Rakesh S", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9822": { name: "Manikandan A", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9863": { name: "Palanichami K", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9893": { name: "Samuvel Gopi", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9894": { name: "Devaraju Mahalingam", role: "ABM", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9895": { name: "Naveenkumar", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9901": { name: "Narendran M", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9909": { name: "Subashchandrabose Murugesan", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9911": { name: "A Sathishkumar", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9938": { name: "K Karthick", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9939": { name: "V Manoj Kumar", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9940": { name: "Tamilarasan", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9942": { name: "A Senthil Kumaran", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9956": { name: "R Hari Prakash", role: "BO", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9965": { name: "Asir Franklin J", role: "—", territory: "—", hq: "—", state: "Tamil Nadu" },
+  "EC9982": { name: "Hari Pradas V", role: "BO", territory: "BB COIMBATORE BO 2", hq: "—", state: "Tamil Nadu" },
+  "EC9986": { name: "Harivigneshwaran A", role: "BO", territory: "BB MADURAI BO 2", hq: "—", state: "Tamil Nadu" },
+  "EC9987": { name: "Murugan", role: "BO", territory: "BB TIRUNELVELI BO 1", hq: "—", state: "Tamil Nadu" },
+  "BBPT1014": { name: "Mohmed Khayyum", role: "BO", territory: "BB HYDERABAD BO 23", hq: "—", state: "Telangana" },
+  "BBPT1057": { name: "Amararapu Srikanth", role: "BO", territory: "BB HYDERABAD BO 19", hq: "—", state: "Telangana" },
+  "EC7941": { name: "Sama venkat uday shankar", role: "ABM", territory: "ABM  Hyderabad 2", hq: "—", state: "Telangana" },
+  "EC7954": { name: "Vorsu  raghavendar", role: "BO", territory: "BB HYDERABAD BO 7", hq: "—", state: "Telangana" },
+  "EC8030": { name: "Kalavena ravi", role: "BO", territory: "BB HYDERABAD BO 11", hq: "—", state: "Telangana" },
+  "EC8080": { name: "Budda upendar", role: "ABM", territory: "ABM  Hyderabad 4", hq: "—", state: "Telangana" },
+  "EC8997": { name: "Kodari rakesh", role: "BO", territory: "BB HYDERABAD BO 15", hq: "—", state: "Telangana" },
+  "EC9000": { name: "Nakka anand kumar", role: "BO", territory: "BB HYDERABAD BO 10", hq: "—", state: "Telangana" },
+  "EC9021": { name: "Akula ranjith", role: "BO", territory: "BB HYDERABAD BO 12", hq: "—", state: "Telangana" },
+  "EC9241": { name: "Shaik nagulu meera", role: "BO", territory: "BB KHAMMAM BO", hq: "—", state: "Telangana" },
+  "EC9254": { name: "Allendula upender", role: "BO", territory: "BO  Hyderabad-25", hq: "—", state: "Telangana" },
+  "EC9320": { name: "Motukuri vinod kumar", role: "BO", territory: "BB KAMAREDDY BO", hq: "—", state: "Telangana" },
+  "EC9344": { name: "Mohammed salahuddin siddiqui", role: "BO", territory: "BO  Hyderabad -18", hq: "—", state: "Telangana" },
+  "EC9345": { name: "Kontham srikanth", role: "BO", territory: "BB HYDERABAD BO 8", hq: "—", state: "Telangana" },
+  "EC9370": { name: "Madthanapeta Nithin", role: "BO", territory: "BB HYDERABAD BO 14", hq: "—", state: "Telangana" },
+  "EC9379": { name: "Shinde suresh", role: "BO", territory: "BB HYDERABAD BO13", hq: "—", state: "Telangana" },
+  "EC9393": { name: "Barla Yashwanth Reddy", role: "ABM", territory: "ABM  Hyderabad 1", hq: "—", state: "Telangana" },
+  "EC9419": { name: "Nagapuri Sanjeev", role: "BO", territory: "BB HYDERABAD BO 4", hq: "—", state: "Telangana" },
+  "EC9466": { name: "Miryala Srikanth", role: "BO", territory: "BB HYDERABAD BO 9", hq: "—", state: "Telangana" },
+  "EC9480": { name: "Chinthanippula Veankateshwara Rao", role: "BO", territory: "BB HYDERABAD BO 6", hq: "—", state: "Telangana" },
+  "EC9576": { name: "Lingam Jagdish Chandrabose", role: "ABM", territory: "ABM  Hyderabad 3", hq: "—", state: "Telangana" },
+  "EC9618": { name: "Guduru Ramreddy", role: "ABM", territory: "ABM  Karimnagar", hq: "—", state: "Telangana" },
+  "EC9631": { name: "Vangapally Ajay Kumar", role: "BO", territory: "BB HYDERABAD BO 2", hq: "—", state: "Telangana" },
+  "EC9666": { name: "Masireddy Satish Reddy", role: "BO", territory: "BB HYDERABAD BO 17", hq: "—", state: "Telangana" },
+  "EC9675": { name: "Mahankali Avinash", role: "BO", territory: "BB HYDERABAD BO 22", hq: "—", state: "Telangana" },
+  "EC9800": { name: "Rathod Jeevan", role: "BO", territory: "BB NIZAMABAD BO 1", hq: "—", state: "Telangana" },
+  "EC9805": { name: "Mohammed Shahin Pasha", role: "RBM", territory: "RBM  Hyderabad", hq: "—", state: "Telangana" },
+  "EC9850": { name: "Shaik Sharief", role: "ABM", territory: "ABM  Hyderabad 5", hq: "—", state: "Telangana" },
+  "EC9887": { name: "Zeeshan Ali", role: "BO", territory: "BO  Warangal", hq: "—", state: "Telangana" },
+  "EC9888": { name: "Mohd Salman Khan", role: "BO", territory: "BO  Hyderabad -01", hq: "—", state: "Telangana" },
+  "EC9891": { name: "Padegal Ali Basha", role: "BO", territory: "BO  Hyderabad -05", hq: "—", state: "Telangana" },
+  "EC9919": { name: "Puli Sandeep", role: "BO", territory: "BO  Hyderabad -03", hq: "—", state: "Telangana" },
+  "EC9935": { name: "Darisi Srinath", role: "ZBM", territory: "ZBM Hyderabad", hq: "—", state: "Telangana" },
+  "EC9960": { name: "Kallem Sagar", role: "BO", territory: "BB HYDERABAD BO 16", hq: "—", state: "Telangana" },
+  "EC9978": { name: "Naragoni Samba Raju", role: "BO", territory: "BO  Hyderabad -20", hq: "—", state: "Telangana" },
+  "EC9989": { name: "Bhukya Sammulal", role: "BO", territory: "BB KARIMNAGAR BO 1", hq: "—", state: "Telangana" },
+  "EC9997": { name: "Khaja Ahmad Vali Shaik", role: "RBM", territory: "-", hq: "—", state: "Telangana" },
+  "CC336": { name: "Pasupuleti N V  Sudharshan", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC5551": { name: "R kumar", role: "ABM", territory: "—", hq: "—", state: "Unassigned" },
+  "EC6744": { name: "Kamal singh", role: "ABM", territory: "—", hq: "—", state: "Unassigned" },
+  "EC6911": { name: "Sujay banik", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC7019": { name: "M venu", role: "ZBM", territory: "—", hq: "—", state: "Unassigned" },
+  "EC8087": { name: "Mohd salim", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC8381": { name: "Semiulla S K", role: "ABM", territory: "—", hq: "—", state: "Unassigned" },
+  "EC8417": { name: "Chandrajeet yadav", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC8727": { name: "Shahnawaj", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC8734": { name: "Mohd shadab", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC8860": { name: "Deepak yadav", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9083": { name: "S Jagadeesh", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9134": { name: "Abhishek yadav", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9478": { name: "Divya K M", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9536": { name: "Abdul Hafeez", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9552": { name: "Chethan A R", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9563": { name: "Vikash Yadav", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9569": { name: "Navi Ahmad", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9570": { name: "Swamygowda B N", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9578": { name: "Mukesh Kumar", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9600": { name: "Bittu Kumar Singh", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9621": { name: "Abhishek Kumar Singh", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9646": { name: "Ankita Rajpoot", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9649": { name: "Vikash Kumar Yadav", role: "ABM", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9710": { name: "Rohel Ahmad", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9716": { name: "Meena Kumari Shahi", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9817": { name: "Bharath Raj P", role: "ABM", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9877": { name: "Vinay Kumar N M", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9878": { name: "Ancharul Hoque", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9903": { name: "Md.Arif", role: "BO", territory: "—", hq: "—", state: "Unassigned" },
+  "EC9930": { name: "Ranjitha D P", role: "BO", territory: "—", hq: "—", state: "Unassigned" }
+};
+
+// ─────────────────────────────────────────────
+//  CONSTANTS
+// ─────────────────────────────────────────────
+const API = "https://hive-pincode-api.onrender.com";
+
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+let currentEmployee = null;
+let allRequests     = [];
+let currentFilter   = "all";
+
+// ─────────────────────────────────────────────
+//  TAB SWITCHING
+// ─────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll(".tab-content").forEach(el => el.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(el => el.classList.remove("active"));
+  document.getElementById("tab-" + tab).classList.add("active");
+  event.currentTarget.classList.add("active");
+  if (tab === "admin") loadAdmin();
+}
+
+// ─────────────────────────────────────────────
+//  EMPLOYEE LOOKUP
+// ─────────────────────────────────────────────
+function onEmpInput(val) {
+  if (!val.trim()) { clearEmpResult(); return; }
+}
+
+function lookupEmployee() {
+  const raw  = document.getElementById("emp-code").value.trim();
+  const code = raw.toUpperCase();
+  const resultEl = document.getElementById("emp-result");
+
+  if (!code) { resultEl.innerHTML = ""; return; }
+
+  const emp = EMP_DB[code];
+  if (emp) {
+    currentEmployee = { code, ...emp };
+    resultEl.innerHTML = `
+      <div class="emp-card found">
+        <div class="emp-name">${emp.name}</div>
+        <div class="emp-meta">
+          <span class="badge badge-role">${emp.role}</span>
+          <span class="badge badge-state">${emp.state}</span>
+          <span>${emp.hq !== "—" ? "📍 " + emp.hq : ""}</span>
+        </div>
+      </div>`;
+    unlockStep2(emp);
+  } else {
+    currentEmployee = null;
+    resultEl.innerHTML = `
+      <div class="emp-card not-found">
+        <div class="emp-name">Employee not found</div>
+        <div class="emp-meta">Check your Employee Code and try again, or contact your manager.</div>
+      </div>`;
+    lockStep2();
+  }
+}
+
+function clearEmpResult() {
+  currentEmployee = null;
+  document.getElementById("emp-result").innerHTML = "";
+  lockStep2();
+}
+
+function unlockStep2(emp) {
+  document.getElementById("step2-section").classList.add("unlocked");
+  document.getElementById("state-display").value = emp.state || "";
+  document.getElementById("pincode").value = "";
+  document.getElementById("area-name").value = "";
+}
+
+function lockStep2() {
+  document.getElementById("step2-section").classList.remove("unlocked");
+  document.getElementById("state-display").value = "";
+}
+
+// ─────────────────────────────────────────────
+//  SUBMIT REQUEST
+// ─────────────────────────────────────────────
+async function submitRequest() {
+  const pincode  = document.getElementById("pincode").value.trim();
+  const areaName = document.getElementById("area-name").value.trim();
+  const alertEl  = document.getElementById("submit-alert");
+  const btn      = document.getElementById("submit-btn");
+
+  hideAlert();
+
+  if (!currentEmployee) { showAlert("error", "⚠️ Please identify yourself first."); return; }
+  if (!pincode || pincode.length < 6) { showAlert("error", "⚠️ Please enter a valid 6-digit pincode."); return; }
+  if (!areaName) { showAlert("error", "⚠️ Please enter the area / locality name."); return; }
+
+  btn.disabled = true;
+  btn.textContent = "Submitting…";
+  btn.classList.add("loading");
+
+  try {
+    const res = await fetch(API + "/api/pincode-requests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        mrName:       currentEmployee.name,
+        mrEmployeeId: currentEmployee.code,
+        mrTerritory:  currentEmployee.territory,
+        pincode,
+        areaName,
+        state:        currentEmployee.state
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showAlert("success", "✅ Pincode " + pincode + " request submitted successfully.");
+      document.getElementById("pincode").value = "";
+      document.getElementById("area-name").value = "";
+    } else {
+      showAlert("error", "⚠️ " + (data.message || "Submission failed. Please try again."));
+    }
+  } catch (err) {
+    showAlert("error", "⚠️ Could not reach the server. Please check your connection and try again.");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Submit Request";
+    btn.classList.remove("loading");
+  }
+}
+
+function showAlert(type, msg) {
+  const el = document.getElementById("submit-alert");
+  el.className = "alert show alert-" + type;
+  el.innerHTML = `<span class="alert-icon">${type === "success" ? "✅" : "⚠️"}</span><span>${msg}</span>`;
+  el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function hideAlert() {
+  const el = document.getElementById("submit-alert");
+  el.className = "alert";
+  el.innerHTML = "";
+}
+
+// ─────────────────────────────────────────────
+//  ADMIN PANEL
+// ─────────────────────────────────────────────
+async function loadAdmin() {
+  document.getElementById("admin-loading").style.display = "block";
+  document.getElementById("requests-container").style.display = "none";
+  document.getElementById("empty-state").style.display = "none";
+
+  try {
+    const [statsRes, reqRes] = await Promise.all([
+      fetch(API + "/api/stats"),
+      fetch(API + "/api/pincode-requests")
+    ]);
+    const stats = await statsRes.json();
+    const reqs  = await reqRes.json();
+
+    document.getElementById("stat-total").textContent    = stats.total    ?? 0;
+    document.getElementById("stat-pending").textContent  = stats.pending  ?? 0;
+    document.getElementById("stat-approved").textContent = stats.approved ?? 0;
+    document.getElementById("stat-rejected").textContent = stats.rejected ?? 0;
+
+    allRequests = Array.isArray(reqs) ? reqs : (reqs.requests || []);
+    renderRequests(currentFilter);
+  } catch (err) {
+    document.getElementById("admin-loading").textContent = "Failed to load. Is the API awake? (Render free tier may need ~30s to wake up — refresh and try again.)";
+  }
+}
+
+function filterRequests(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  renderRequests(filter);
+}
+
+function renderRequests(filter) {
+  const filtered = filter === "all"
+    ? allRequests
+    : allRequests.filter(r => r.status === filter);
+
+  document.getElementById("admin-loading").style.display = "none";
+
+  if (!filtered.length) {
+    document.getElementById("requests-container").style.display = "none";
+    document.getElementById("empty-state").style.display = "block";
+    return;
+  }
+
+  document.getElementById("requests-container").style.display = "block";
+  document.getElementById("empty-state").style.display = "none";
+
+  const tbody = document.getElementById("requests-tbody");
+  tbody.innerHTML = filtered.map(r => {
+    const date = r.createdAt ? new Date(r.createdAt).toLocaleDateString("en-IN", { day:"2-digit", month:"short", year:"2-digit" }) : "—";
+    const statusClass = { pending:"status-pending", approved:"status-approved", rejected:"status-rejected" }[r.status] || "";
+    const actions = r.status === "pending"
+      ? `<div class="action-btns">
+           <button class="btn-approve" onclick="updateStatus('${r._id}','approved')">✓ Approve</button>
+           <button class="btn-reject"  onclick="updateStatus('${r._id}','rejected')">✗ Reject</button>
+         </div>`
+      : `<div class="action-btns">
+           <button class="btn-revert" onclick="updateStatus('${r._id}','pending')">↺ Revert</button>
+         </div>`;
+    return `<tr>
+      <td class="td-pin">${r.pincode || "—"}</td>
+      <td>${r.areaName || "—"}</td>
+      <td>${r.state || "—"}</td>
+      <td><strong>${r.mrName || "—"}</strong><br/><span class="td-code">${r.mrEmployeeId || ""}</span></td>
+      <td style="font-size:12px;color:var(--dim)">${r.mrTerritory || "—"}</td>
+      <td><span class="status-badge ${statusClass}">${r.status}</span></td>
+      <td style="font-size:12px;color:var(--dim)">${date}</td>
+      <td>${actions}</td>
+    </tr>`;
+  }).join("");
+}
+
+async function updateStatus(id, status) {
+  try {
+    const res = await fetch(`${API}/api/pincode-requests/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status })
+    });
+    if (res.ok) loadAdmin();
+  } catch (err) {
+    alert("Failed to update status. Please try again.");
+  }
+}
+
+// Auto-lookup on Enter in emp-code input already handled via onkeydown
+</script>
+</body>
+</html>
