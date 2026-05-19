@@ -1,0 +1,19 @@
+{
+  "name": "hive-pincode-api",
+  "version": "2.0.0",
+  "description": "Hive Frontline Pincode Portal — backend API",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "mongodb": "^6.7.0"
+  }
+}
