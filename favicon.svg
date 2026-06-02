@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Navy background pill -->
+  <rect width="32" height="32" rx="8" fill="#0E1740"/>
+  <!-- Location pin — red body -->
+  <path d="M16 5.5C11.31 5.5 7.5 9.31 7.5 14C7.5 20.25 15.08 26.06 15.4 26.31C15.58 26.44 15.79 26.5 16 26.5C16.21 26.5 16.42 26.44 16.6 26.31C16.92 26.06 24.5 20.25 24.5 14C24.5 9.31 20.69 5.5 16 5.5Z" fill="#C8102E"/>
+  <!-- White inner ring -->
+  <circle cx="16" cy="14" r="4.2" fill="white"/>
+  <!-- Red center dot -->
+  <circle cx="16" cy="14" r="2.1" fill="#C8102E"/>
+</svg>
