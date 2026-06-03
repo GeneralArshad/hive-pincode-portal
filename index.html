@@ -582,7 +582,7 @@
   </div>
 
   <div class="sidebar-bottom">
-    <div class="sidebar-ver"><strong>v2.4</strong> · British Biologicals</div>
+    <div class="sidebar-ver"><strong>v2.5</strong> · British Biologicals</div>
   </div>
 </aside>
 
@@ -699,7 +699,7 @@
       </div><!-- /req-cols -->
 
       <div class="page-footer">
-        <span class="page-footer-txt">v2.4</span>
+        <span class="page-footer-txt">v2.5</span>
         <div class="page-footer-dot"></div>
         <img class="page-footer-logo" src="https://www.britishbiologicals.com/wp-content/uploads/2022/05/cropped-bb-logo.png" alt="" onerror="this.style.display='none'"/>
         <div class="page-footer-dot"></div>
@@ -1400,11 +1400,12 @@ let loaderMsgInterval = null, areaOverrideActive = false;
 
 // ── Pincode lookup loader ──
 const LOOKUP_MSGS = [
-  'Connecting to postal database…',
-  'Fetching post office records…',
-  'Verifying area names…',
-  'Cross-checking with postal map…',
-  'Almost done…',
+  'Connecting to India Post database…',
+  'Fetching official post office records…',
+  'India Post servers can be slow — hang tight…',
+  'Still connecting, please wait…',
+  'Verifying official post office names…',
+  'Almost there — nearly got it…',
 ];
 function startPinLoader(el) {
   let i = 0;
@@ -1574,9 +1575,7 @@ async function fetchPin(pin) {
       document.getElementById('pi-p').textContent=offices.length;
       requestAnimationFrame(()=>info.classList.add('show'));
       sel.innerHTML='<option value="">Select area…</option>'+offices.map(o=>`<option value="${o.Name}">${o.Name}</option>`).join('');
-      // Respect override state: if user already switched to manual, keep it
       if (!areaOverrideActive) { sel.style.display=''; sel.disabled=false; manual.style.display='none'; manual.value=''; }
-      // Show override toggle
       overrideBtn.classList.add('show');
       checkDup(pin);
       return true;
@@ -1593,22 +1592,28 @@ async function fetchPin(pin) {
     overrideBtn.classList.remove('show');
   }
 
+  // India Post via Cloudflare Worker proxy (only authoritative source)
+  // 40s client-side timeout — India Post servers are sometimes slow
   const PINCODE_PROXY = 'https://hivepincodeportal.arshadsutar-work.workers.dev';
-  // 1️⃣ Try Cloudflare Worker proxy — bypasses expired India Post SSL cert
   try {
-    const r=await fetch(`${PINCODE_PROXY}/api/pincode/${pin}`);
-    if(r.ok) { const data=await r.json(); if(renderOffices(data)) return; }
-  } catch {}
-
-  // 2️⃣ Try India Post directly (works if their cert is valid)
-  try {
-    const r=await fetch(`https://api.postalpincode.in/pincode/${pin}`);
-    const data=await r.json();
-    if(renderOffices(data)) return;
-    showManual('✗ Pincode not found — enter area manually');
-  } catch {
-    // Both sources failed — unblock user with manual input
-    showManual('⚠ Postal API unavailable — enter area manually');
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 40000);
+    const r = await fetch(`${PINCODE_PROXY}/api/pincode/${pin}`, { signal: ctrl.signal });
+    clearTimeout(tid);
+    if (r.ok) {
+      const data = await r.json();
+      if (renderOffices(data)) return;
+      // Worker responded but pincode not found in India Post records
+      showManual('✗ Pincode not found in India Post records — please enter the area name manually');
+    } else {
+      showManual('⚠ Postal server error — please enter the area name manually');
+    }
+  } catch(e) {
+    if (e.name === 'AbortError') {
+      showManual('⏱ India Post took too long to respond — please enter the area name manually');
+    } else {
+      showManual('⚠ Could not reach India Post — please enter the area name manually');
+    }
   }
 }
 
