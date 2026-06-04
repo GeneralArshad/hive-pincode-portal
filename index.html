@@ -1601,7 +1601,7 @@ async function fetchPin(pin) {
   // repeatedly from the frontend rather than retrying inside the worker.
   const PINCODE_PROXY = 'https://hivepincodeportal.arshadsutar-work.workers.dev';
   const MAX_DURATION = 60000;   // 60s total
-  const PER_CALL_MS  = 12000;   // 12s per attempt
+  const PER_CALL_MS  = 18000;   // 18s per attempt (worker has 15s internally — 3s buffer for network)
   const BETWEEN_MS   = 1500;    // 1.5s pause between calls
   const startTime    = Date.now();
 
