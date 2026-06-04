@@ -1396,16 +1396,18 @@ const API = "https://hive-pincode-api.onrender.com";
 let curEmp = null, allReqs = [], curFilter = "all", pinTimer = null;
 let divFilter = "all"; // sidebar division filter
 let curRmEmp = null, assignedPincodes = [], curTypeFilter = "all";
-let loaderMsgInterval = null, areaOverrideActive = false;
+let loaderMsgInterval = null, areaOverrideActive = false, currentLookupPin = null;
 
 // ── Pincode lookup loader ──
 const LOOKUP_MSGS = [
   'Connecting to India Post database…',
   'Fetching official post office records…',
-  'Retrying — India Post servers can be slow…',
-  'Making another attempt, please wait…',
-  'Still trying, almost there…',
-  'One more retry in progress…',
+  'India Post servers are slow — retrying…',
+  'Attempt in progress, please wait…',
+  'Still trying — this can take up to a minute…',
+  'Retrying connection to India Post…',
+  'Hang tight, we keep trying until we get it…',
+  'Another attempt in progress…',
 ];
 function startPinLoader(el) {
   let i = 0;
@@ -1546,6 +1548,7 @@ function lockStep2() {
 // ── Pincode lookup ──
 function onPinIn(v) {
   clearTimeout(pinTimer); stopPinLoader();
+  currentLookupPin = null; // cancel any in-flight retry loop
   const st=document.getElementById('pin-status'), info=document.getElementById('pin-info'), sel=document.getElementById('area-sel');
   if(v.length<6) {
     st.className='pin-status'; st.innerHTML='';
@@ -1555,6 +1558,7 @@ function onPinIn(v) {
     resetAreaOverride();
     hideDup(); return;
   }
+  currentLookupPin = v;
   startPinLoader(st);
   pinTimer = setTimeout(()=>fetchPin(v), 420);
 }
@@ -1592,28 +1596,40 @@ async function fetchPin(pin) {
     overrideBtn.classList.remove('show');
   }
 
-  // India Post via Cloudflare Worker proxy (only authoritative source)
-  // 40s client-side timeout — India Post servers are sometimes slow
+  // Retry loop: keep calling the worker for up to 60 seconds.
+  // Each call has a 12s timeout; worker has a 30s Cloudflare wall-clock limit so we call it
+  // repeatedly from the frontend rather than retrying inside the worker.
   const PINCODE_PROXY = 'https://hivepincodeportal.arshadsutar-work.workers.dev';
-  try {
-    const ctrl = new AbortController();
-    const tid = setTimeout(() => ctrl.abort(), 40000);
-    const r = await fetch(`${PINCODE_PROXY}/api/pincode/${pin}`, { signal: ctrl.signal });
-    clearTimeout(tid);
-    if (r.ok) {
-      const data = await r.json();
-      if (renderOffices(data)) return;
-      // Worker responded but pincode not found in India Post records
-      showManual('✗ Pincode not found in India Post records — please enter the area name manually');
-    } else {
-      showManual('⚠ Postal server error — please enter the area name manually');
-    }
-  } catch(e) {
-    if (e.name === 'AbortError') {
-      showManual('⏱ India Post took too long to respond — please enter the area name manually');
-    } else {
-      showManual('⚠ Could not reach India Post — please enter the area name manually');
-    }
+  const MAX_DURATION = 60000;   // 60s total
+  const PER_CALL_MS  = 12000;   // 12s per attempt
+  const BETWEEN_MS   = 1500;    // 1.5s pause between calls
+  const startTime    = Date.now();
+
+  while (Date.now() - startTime < MAX_DURATION) {
+    // Stop if the user has typed a different pincode
+    if (currentLookupPin !== pin) return;
+
+    try {
+      const ctrl = new AbortController();
+      const tid  = setTimeout(() => ctrl.abort(), PER_CALL_MS);
+      const r    = await fetch(`${PINCODE_PROXY}/api/pincode/${pin}`, { signal: ctrl.signal });
+      clearTimeout(tid);
+      if (r.ok) {
+        const data = await r.json();
+        if (renderOffices(data)) return; // ✅ success — stop looping
+      }
+    } catch { /* timeout or network error — will retry */ }
+
+    // Pause before next attempt (check cancellation first)
+    if (currentLookupPin !== pin) return;
+    const remaining = MAX_DURATION - (Date.now() - startTime);
+    if (remaining <= 0) break;
+    await new Promise(resolve => setTimeout(resolve, Math.min(BETWEEN_MS, remaining)));
+  }
+
+  // 60 seconds elapsed — give up and ask for manual entry
+  if (currentLookupPin === pin) {
+    showManual('⏱ India Post did not respond in 60 s — please enter the area name manually');
   }
 }
 
@@ -1675,7 +1691,7 @@ function clearForm() {
   document.getElementById('reason-in').value='';
   document.getElementById('pin-status').className='pin-status'; document.getElementById('pin-status').innerHTML='';
   document.getElementById('pin-info').classList.remove('show');
-  stopPinLoader(); resetAreaOverride();
+  stopPinLoader(); resetAreaOverride(); currentLookupPin = null;
   hideDup(); clearEmpState(); hideAlert();
 }
 
